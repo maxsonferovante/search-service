@@ -9,6 +9,7 @@ import com.maal.searchservice.domain.repository.FlightRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -35,8 +36,8 @@ public class JpaFligthPriceAdapter  implements FlightRepository{
     }
 
     @Override
-    public List<FlightPrice> findByPriceBetweenMinAndMax(String origin, String destination, String travelDate, double minPrice, double maxPrice) {
-        List<FlightPriceEntity> flightPriceEntities =  jpaFlightPriceRepository.findByPriceBetweenPrices(minPrice, maxPrice);
+    public List<FlightPrice> findByPriceBetweenMinAndMax(String origin, String destination, String travelDate, BigDecimal minPrice, BigDecimal maxPrice) {
+        List<FlightPriceEntity> flightPriceEntities =  jpaFlightPriceRepository.findByPriceBetween(minPrice, maxPrice);
         return flightPriceEntities.stream()
                 .map(flightPriceMapper::toDomain)
                 .filter(flightPrice -> flightPrice.getOrigin().equalsIgnoreCase(origin) &&
