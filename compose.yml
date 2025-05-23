@@ -1,0 +1,18 @@
+version: '3.9'
+
+services:
+  postgres:
+    container_name: postgres-users
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: admin
+      POSTGRES_USER: admin
+      POSTGRES_DB: search
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U admin -d search" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5

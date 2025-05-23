@@ -1,0 +1,6 @@
+INSERT INTO watch_route (id, alert_id, origin, destination, outbound_date, return_date, target_price, tolerance_up, currency, active) VALUES
+                                                                                                                                          (1, 101, 'GRU', 'MIA', '2025-08-15', '2025-08-25', 2500.00, 100.00, 'BRL', TRUE),
+                                                                                                                                          (2, 102, 'GIG', 'LIS', '2025-09-10', '2025-09-20', 3200.50, 150.00, 'BRL', TRUE),
+                                                                                                                                          (3, 103, 'SSA', 'JFK', '2025-10-01', '2025-10-12', 2800.75, 50.25, 'USD', TRUE),
+                                                                                                                                          (4, 104, 'POA', 'SCL', '2025-11-05', '2025-11-15', 1200.00, 75.00, 'CLP', FALSE),
+                                                                                                                                          (5, 105, 'BSB', 'CDG', '2025-12-01', '2025-12-10', 4500.00, 200.00, 'EUR', TRUE);
