@@ -18,7 +18,8 @@ public class WatchRoute {
     private Long alertId;
     private String origin;
     private String destination;
-    private LocalDate travelDate;
+    private LocalDate outboundDate;
+    private LocalDate returnDate;
     private BigDecimal targetPrice;
     private BigDecimal toleranceUp;
     private Currency currency;

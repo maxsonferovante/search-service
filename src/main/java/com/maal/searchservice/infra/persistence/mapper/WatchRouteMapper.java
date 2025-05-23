@@ -13,7 +13,8 @@ public class WatchRouteMapper {
         entity.setAlertId(domain.getAlertId());
         entity.setOrigin(domain.getOrigin());
         entity.setDestination(domain.getDestination());
-        entity.setTravelDate(domain.getTravelDate());
+        entity.setOutboundDate(domain.getOutboundDate());
+        entity.setReturnDate(domain.getReturnDate());
         entity.setTargetPrice(domain.getTargetPrice());
         entity.setToleranceUp(domain.getToleranceUp());
         entity.setCurrency(domain.getCurrency());
@@ -26,7 +27,8 @@ public class WatchRouteMapper {
                 entity.getAlertId(),
                 entity.getOrigin(),
                 entity.getDestination(),
-                entity.getTravelDate(),
+                entity.getOutboundDate(),
+                entity.getReturnDate(),
                 entity.getTargetPrice(),
                 entity.getToleranceUp(),
                 entity.getCurrency(),
