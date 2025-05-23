@@ -22,7 +22,7 @@ public class WatchRouteMapper {
     }
 
     public WatchRoute toDomain(WatchRouteEntity entity) {
-        return new com.maal.searchservice.domain.modal.WatchRoute(
+        return new WatchRoute(
                 entity.getAlertId(),
                 entity.getOrigin(),
                 entity.getDestination(),
