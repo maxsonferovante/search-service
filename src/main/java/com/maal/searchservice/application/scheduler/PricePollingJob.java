@@ -8,22 +8,42 @@ import com.maal.searchservice.infra.api.ExternalFlightApiClient;
 import com.maal.searchservice.infra.api.dto.FlightApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.Semaphore;
 
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class PricePollingJob {
     private final WatchRouteRepository watchRouteRepository;
     private final FlightRepository flightRepository;
     private final ExternalFlightApiClient externalFlightApiClient;
     private final PriceChangeDetector priceChangeDetector;
+    private final ExecutorService virtualThreadTaskExecutor;
+    private final Semaphore apiAccessSemaphore;
+
+    public PricePollingJob(WatchRouteRepository watchRouteRepository,
+                           FlightRepository flightRepository,
+                           ExternalFlightApiClient externalFlightApiClient,
+                           PriceChangeDetector priceChangeDetector,
+                           @Qualifier("virtualThreadTaskExecutor") ExecutorService virtualThreadTaskExecutor,
+                           @Qualifier("apiAccessSemaphore") Semaphore apiAccessSemaphore) {
+        this.watchRouteRepository = watchRouteRepository;
+        this.flightRepository = flightRepository;
+        this.externalFlightApiClient = externalFlightApiClient;
+        this.priceChangeDetector = priceChangeDetector;
+        this.virtualThreadTaskExecutor = virtualThreadTaskExecutor;
+        this.apiAccessSemaphore = apiAccessSemaphore;
+    }
+
     // Executa a cada 30 minutos.
     // Cron: segundo minuto hora dia-do-mês mês dia-da-semana
     // "0 */30 * * * *" = no segundo 0, a cada 30 minutos, de qualquer hora, qualquer dia do mês, qualquer mês, qualquer dia da semana.
@@ -39,27 +59,47 @@ public class PricePollingJob {
             log.info("Nenhuma rota ativa encontrada para monitoramento.");
             return;
         }
-
-        log.info("Encontradas {} rotas ativas para verificar.", activeRoutes.size());
+        log.info("Encontradas {} rotas ativas. Submetendo para processamento com limite de concorrência...", activeRoutes.size());
 
         for (WatchRoute route : activeRoutes) {
-            log.debug("Verificando rota de alerta id  {} - {} Para: {}", route.getAlertId(), route.getOrigin(), route.getDestination());
-            try {
-                FlightApiResponse flightData = externalFlightApiClient.getFlightResults(
-                        route.getOrigin(),
-                        route.getDestination(),
-                        route.getOutboundDate().toString(),
-                        route.getReturnDate().toString()
-                );
+            // Não bloqueia o loop principal, a aquisição do semáforo ocorre dentro da virtual thread
+            virtualThreadTaskExecutor.submit(() -> {
+                boolean permitAcquired = false;
+                try {
+                    log.debug("VT-{}: Tentando adquirir permissão para rota de alerta id {}",
+                            Thread.currentThread().threadId(), route.getAlertId());
+                    apiAccessSemaphore.acquire(); // Tenta adquirir uma permissão. Bloqueia se nenhuma estiver disponível.
+                    permitAcquired = true;
+                    log.info("VT-{}: Permissão adquirida. Verificando rota de alerta id {} - {} Para: {}",
+                            Thread.currentThread().threadId(), route.getAlertId(), route.getOrigin(), route.getDestination());
 
-                // Delega a detecção de variação e possível notificação/armazenamento
-                priceChangeDetector.checkForPriceChangesAndNotify(route, flightData);
+                    FlightApiResponse flightData = externalFlightApiClient.getFlightResults(
+                            route.getOrigin(),
+                            route.getDestination(),
+                            route.getOutboundDate().toString(),
+                            route.getReturnDate() != null ? route.getReturnDate().toString() : null
+                    );
 
-            } catch (Exception e) {
-                log.error("Erro ao buscar ou processar voos para a rota ID {}: {} -> {}. Erro: {}",
-                        route.getAlertId(), route.getOrigin(), route.getDestination(), e.getMessage(), e);
-            }
+                    priceChangeDetector.checkForPriceChangesAndNotify(route, flightData);
+
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt(); // Restaura o status de interrupção
+                    log.error("VT-{}: Tarefa para rota ID {} interrompida enquanto esperava permissão ou durante execução.",
+                            Thread.currentThread().threadId(), route.getAlertId(), e);
+                } catch (Exception e) {
+                    log.error("VT-{}: Erro ao buscar ou processar voos para a rota ID {}: {} -> {}. Erro: {}",
+                            Thread.currentThread().threadId(), route.getAlertId(), route.getOrigin(), route.getDestination(), e.getMessage(), e);
+                } finally {
+                    if (permitAcquired) {
+                        apiAccessSemaphore.release(); // Libera a permissão, crucialmente no bloco finally
+                        log.debug("VT-{}: Permissão liberada para rota de alerta id {}",
+                                Thread.currentThread().threadId(), route.getAlertId());
+                    }
+                }
+            });
         }
-        log.info("Job de polling de preços de voos concluído.");
+        // O log de "concluído" aqui significa que todas as tarefas foram submetidas.
+        // Elas serão executadas respeitando o limite do semáforo.
+        log.info("Todas as rotas foram submetidas para processamento. A execução ocorrerá com limite de concorrência.");
     }
 }
