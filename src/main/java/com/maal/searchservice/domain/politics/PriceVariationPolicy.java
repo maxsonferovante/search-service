@@ -21,8 +21,14 @@ public class PriceVariationPolicy {
         if (oldPrice == null || newPrice == null || tolerance == null) {
             return false;
         }
+        if (oldPrice.compareTo(BigDecimal.ZERO) <= 0 || newPrice.compareTo(BigDecimal.ZERO) <= 0 || tolerance.compareTo(BigDecimal.ZERO) <= 0) {
+            return false;
+        }
+        if (oldPrice.subtract(newPrice).compareTo(BigDecimal.ZERO) > 0) {
+            return true;
+        }
         BigDecimal priceDifference = oldPrice.subtract(newPrice).abs();
-        return priceDifference.compareTo(tolerance) > 0;
+        return priceDifference.compareTo(tolerance) < 0;
 
     }
 }

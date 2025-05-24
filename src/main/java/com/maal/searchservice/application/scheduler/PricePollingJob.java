@@ -11,7 +11,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -51,7 +53,7 @@ public class PricePollingJob {
                 );
 
                 // Delega a detecção de variação e possível notificação/armazenamento
-                priceChangeDetector.checkForPriceChangesAndNotify(route, flightData, watchRouteRepository);
+                priceChangeDetector.checkForPriceChangesAndNotify(route, flightData);
 
             } catch (Exception e) {
                 log.error("Erro ao buscar ou processar voos para a rota ID {}: {} -> {}. Erro: {}",

@@ -31,7 +31,7 @@ public class PriceChangeDetector {
     private final PriceVariationPolicy priceVariationPolicy;
 
 
-    public void checkForPriceChangesAndNotify(WatchRoute route, FlightApiResponse newFlightData, WatchRouteRepository watchRouteRepository) {
+    public void checkForPriceChangesAndNotify(WatchRoute route, FlightApiResponse newFlightData) {
         if (newFlightData == null) {
             log.error("Não foram recebidos dados de voo para a rota: " + route.getAlertId());
             return;
@@ -44,17 +44,18 @@ public class PriceChangeDetector {
             Integer currentPrice = cheapestOption.get().getPrice();
             log.info("Rota: " + route.getOrigin() + "->" + route.getDestination() +
                     ", Preço atual mais baixo: " + currentPrice);
-
             // Verifica se o preço atual é significativamente diferente do último preço conhecido
             Boolean isSignificantDrop = priceVariationPolicy.isSignificantDrop(
-                    BigDecimal.valueOf(currentPrice),
                     route.getTargetPrice(),
+                    BigDecimal.valueOf(currentPrice),
                     route.getToleranceUp()
             );
             if (Boolean.TRUE.equals(isSignificantDrop)) {
                 log.info("ALERTA DE PREÇO! Rota: " + route.getOrigin() + "->" + route.getDestination() +
                         ". Preço antigo: " + route.getTargetPrice() + ", Preço novo: " + currentPrice);
                 // Aqui você implementaria a lógica de notificação (ex: enviar email, SMS, etc.)
+            } else {
+                log.info("Nenhuma alteração significativa de preço detectada para a rota: " + route.getOrigin() + "->" + route.getDestination());
             }
 
         } else {
