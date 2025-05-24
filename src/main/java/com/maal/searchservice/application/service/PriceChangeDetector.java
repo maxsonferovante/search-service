@@ -51,7 +51,7 @@ public class PriceChangeDetector {
                     route.getToleranceUp()
             );
             if (Boolean.TRUE.equals(isSignificantDrop)) {
-                log.info("ALERTA DE PREÇO! Rota: " + route.getOrigin() + "->" + route.getDestination() +
+                log.info("ALERTA DE PREÇO! Para o alerta: " + route.getAlertId() + "Rota: " + route.getOrigin() + "->" + route.getDestination() +
                         ". Preço antigo: " + route.getTargetPrice() + ", Preço novo: " + currentPrice);
                 // Aqui você implementaria a lógica de notificação (ex: enviar email, SMS, etc.)
             } else {
