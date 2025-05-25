@@ -1,13 +1,15 @@
 package com.maal.searchservice;
 
+import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-@SpringBootApplication
+@EnableRabbit
 @EnableFeignClients
 @EnableScheduling
+@SpringBootApplication
 public class SearchServiceApplication {
 
     public static void main(String[] args) {
