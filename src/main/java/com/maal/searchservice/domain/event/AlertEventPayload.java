@@ -1,4 +1,4 @@
-package com.maal.searchservice.domain.modal;
+package com.maal.searchservice.domain.event;
 
 
 import lombok.*;

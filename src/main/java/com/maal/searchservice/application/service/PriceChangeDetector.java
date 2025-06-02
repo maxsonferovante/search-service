@@ -4,11 +4,11 @@ package com.maal.searchservice.application.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.maal.searchservice.config.RabbitMQConfig;
-import com.maal.searchservice.domain.modal.AlertEventPayload;
+import com.maal.searchservice.domain.event.AlertEventPayload;
 import com.maal.searchservice.domain.modal.WatchRoute;
 import com.maal.searchservice.domain.politics.PriceVariationPolicy;
+import com.maal.searchservice.domain.port.PriceAlertPublisher;
 import com.maal.searchservice.domain.repository.FlightRepository;
-import com.maal.searchservice.domain.repository.WatchRouteRepository;
 import com.maal.searchservice.infra.api.dto.FlightApiResponse;
 import com.maal.searchservice.infra.api.dto.FlightOption;
 import lombok.RequiredArgsConstructor;
@@ -36,8 +36,7 @@ public class PriceChangeDetector {
 
     private final FlightRepository flightRepository;
     private final PriceVariationPolicy priceVariationPolicy;
-    private final RabbitTemplate rabbitTemplate;
-    private final ObjectMapper objectMapper;
+    private final PriceAlertPublisher priceAlertPublisher;
 
     public void checkForPriceChangesAndNotify(WatchRoute route, FlightApiResponse newFlightData) throws JsonProcessingException {
         if (newFlightData == null) {
@@ -76,7 +75,7 @@ public class PriceChangeDetector {
                         .checkedAt(Instant.now())
                         .build();
 
-                rabbitTemplate.convertAndSend(RabbitMQConfig.FLIGHT_ALERTS_EXCHANGE_NAME, "", objectMapper.writeValueAsString(payload));
+                priceAlertPublisher.publishPriceAlert(payload);
                 log.info("Alerta enviado com sucesso para a fila RabbitMQ: " + route.getAlertId());
             } else {
                 log.info("Nenhuma alteração significativa de preço detectada para a rota: " + route.getOrigin() + "->" + route.getDestination());
