@@ -3,7 +3,6 @@ package com.maal.searchservice.application.mapper;
 
 import com.maal.searchservice.domain.event.AlertEventPayload;
 import com.maal.searchservice.domain.modal.PriceUpdated;
-import com.maal.searchservice.infra.persistence.entity.PriceUpdatedEntity;
 import org.springframework.stereotype.Component;
 
 @Component

@@ -1,4 +1,4 @@
-package com.maal.searchservice.infra.messaging;
+package com.maal.searchservice.infra.messaging.publisher;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;

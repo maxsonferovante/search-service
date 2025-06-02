@@ -41,7 +41,7 @@ public class PricePollingJob {
     // Executa a cada 30 minutos.
     // Cron: segundo minuto hora dia-do-mês mês dia-da-semana
     // "0 */30 * * * *" = no segundo 0, a cada 30 minutos, de qualquer hora, qualquer dia do mês, qualquer mês, qualquer dia da semana.
-    @Scheduled(cron = "0 */1 * * * *")
+    @Scheduled(cron = "0 */30 * * * *")
     // Alternativas:
     // @Scheduled(fixedRate = 30 * 60 * 1000) // Executa 30 minutos após a última *conclusão* ter iniciado
     // @Scheduled(fixedDelay = 30 * 60 * 1000) // Executa 30 minutos após a última *conclusão* ter terminado

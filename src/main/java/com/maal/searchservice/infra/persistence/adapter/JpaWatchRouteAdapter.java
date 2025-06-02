@@ -2,12 +2,10 @@ package com.maal.searchservice.infra.persistence.adapter;
 
 import com.maal.searchservice.domain.modal.WatchRoute;
 import com.maal.searchservice.domain.repository.WatchRouteRepository;
-import com.maal.searchservice.infra.persistence.entity.WatchRouteEntity;
 import com.maal.searchservice.infra.persistence.mapper.WatchRouteMapper;
 import com.maal.searchservice.infra.persistence.repository.JpaWatchRouteRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.reactive.TransactionalOperator;
 
 import java.util.List;
 import java.util.Optional;
