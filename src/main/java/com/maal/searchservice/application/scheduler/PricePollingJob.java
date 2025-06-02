@@ -6,17 +6,13 @@ import com.maal.searchservice.domain.repository.FlightRepository;
 import com.maal.searchservice.domain.repository.WatchRouteRepository;
 import com.maal.searchservice.infra.api.ExternalFlightApiClient;
 import com.maal.searchservice.infra.api.dto.FlightApiResponse;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
 
 
@@ -24,20 +20,17 @@ import java.util.concurrent.Semaphore;
 @Slf4j
 public class PricePollingJob {
     private final WatchRouteRepository watchRouteRepository;
-    private final FlightRepository flightRepository;
     private final ExternalFlightApiClient externalFlightApiClient;
     private final PriceChangeDetector priceChangeDetector;
     private final ExecutorService virtualThreadTaskExecutor;
     private final Semaphore apiAccessSemaphore;
 
     public PricePollingJob(WatchRouteRepository watchRouteRepository,
-                           FlightRepository flightRepository,
                            ExternalFlightApiClient externalFlightApiClient,
                            PriceChangeDetector priceChangeDetector,
                            @Qualifier("virtualThreadTaskExecutor") ExecutorService virtualThreadTaskExecutor,
                            @Qualifier("apiAccessSemaphore") Semaphore apiAccessSemaphore) {
         this.watchRouteRepository = watchRouteRepository;
-        this.flightRepository = flightRepository;
         this.externalFlightApiClient = externalFlightApiClient;
         this.priceChangeDetector = priceChangeDetector;
         this.virtualThreadTaskExecutor = virtualThreadTaskExecutor;
