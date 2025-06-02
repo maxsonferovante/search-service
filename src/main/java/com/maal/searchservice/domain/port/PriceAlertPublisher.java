@@ -5,5 +5,5 @@ import com.maal.searchservice.domain.event.AlertEventPayload;
 
 public interface PriceAlertPublisher {
 
-    void publishPriceAlert(AlertEventPayload event) throws JsonProcessingException;
+    void publishPriceAlert(AlertEventPayload event);
 }
