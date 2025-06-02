@@ -1,6 +1,7 @@
 package com.maal.searchservice.application.scheduler;
 
 import com.maal.searchservice.application.service.PriceChangeDetector;
+import com.maal.searchservice.application.service.PriceDropOrchestrator;
 import com.maal.searchservice.domain.modal.WatchRoute;
 import com.maal.searchservice.domain.repository.FlightRepository;
 import com.maal.searchservice.domain.repository.WatchRouteRepository;
@@ -21,18 +22,18 @@ import java.util.concurrent.Semaphore;
 public class PricePollingJob {
     private final WatchRouteRepository watchRouteRepository;
     private final ExternalFlightApiClient externalFlightApiClient;
-    private final PriceChangeDetector priceChangeDetector;
+    private final PriceDropOrchestrator priceDropOrchestrator;
     private final ExecutorService virtualThreadTaskExecutor;
     private final Semaphore apiAccessSemaphore;
 
     public PricePollingJob(WatchRouteRepository watchRouteRepository,
                            ExternalFlightApiClient externalFlightApiClient,
-                           PriceChangeDetector priceChangeDetector,
+                           PriceDropOrchestrator priceDropOrchestrator,
                            @Qualifier("virtualThreadTaskExecutor") ExecutorService virtualThreadTaskExecutor,
                            @Qualifier("apiAccessSemaphore") Semaphore apiAccessSemaphore) {
         this.watchRouteRepository = watchRouteRepository;
         this.externalFlightApiClient = externalFlightApiClient;
-        this.priceChangeDetector = priceChangeDetector;
+        this.priceDropOrchestrator = priceDropOrchestrator;
         this.virtualThreadTaskExecutor = virtualThreadTaskExecutor;
         this.apiAccessSemaphore = apiAccessSemaphore;
     }
@@ -73,7 +74,7 @@ public class PricePollingJob {
                             route.getReturnDate() != null ? route.getReturnDate().toString() : null
                     );
 
-                    priceChangeDetector.checkForPriceChangesAndNotify(route, flightData);
+                    priceDropOrchestrator.handleRoute(route, flightData);
 
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt(); // Restaura o status de interrupção
