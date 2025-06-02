@@ -1,7 +1,6 @@
 package com.maal.searchservice.infra.messaging;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.maal.searchservice.config.RabbitMQConfig;
 import com.maal.searchservice.domain.event.AlertEventPayload;
@@ -21,8 +20,9 @@ public class RabbitPriceAlertPublisher implements PriceAlertPublisher {
     @Override
     public void publishPriceAlert(AlertEventPayload event){
         try{
-            String payload = mapper.writeValueAsString(event);
-            rabbit.convertAndSend(RabbitMQConfig.FLIGHT_ALERTS_EXCHANGE_NAME, "", mapper.writeValueAsString(payload));
+            rabbit.convertAndSend(RabbitMQConfig.FLIGHT_ALERTS_EXCHANGE_NAME,
+                    "",
+                    mapper.writeValueAsString(event));
         } catch (Exception e) {
             throw new MessagingException(
                     "Erro ao publicar alerta de preço no RabbitMQ: " + e.getMessage(),
