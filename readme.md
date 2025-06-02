@@ -59,14 +59,14 @@ Este serviço implementa uma arquitetura hexagonal (Ports & Adapters) com Clean 
 
 ## 2. Camada **Application** (`com.maal.searchservice.application`)
 
-| Classe                               | Dependências (→)                                                                             | Responsabilidade                                                                                          |
-| ------------------------------------ | -------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| **PricePollingJob** *(@Scheduled)*   | → `WatchRouteRepository`<br>→ `ExternalFlightApiClient`<br>→ `PriceDropOrchestrator`         | Executa periodicamente: coleta rotas ativas, chama API externa e delega orquestração.                   |
-| **PriceDropOrchestrator**            | → `PriceChangeDetector`<br>→ `PriceHistoryRepository`<br>→ `PriceAlertPublisher`<br>→ `PriceUpdatedMapper` | Orquestra o fluxo de detecção de quedas e publicação de alertas.                                         |
-| **PriceChangeDetector**              | → `FlightRepository`<br>→ `PriceVariationPolicy`                                            | Detecta variações significativas comparando preços atuais com histórico.                                 |
-| **PriceUpdatedMapper**               | —                                                                                            | Converte eventos de domínio para payloads de alerta.                                                     |
-| **TriggerManualFetchCommand**        | —                                                                                            | Comando para trigger manual de coleta (DTO/Record).                                                      |
-
+| Classe                               | Dependências (→)                                                                             | Responsabilidade                                                                      |
+| ------------------------------------ | -------------------------------------------------------------------------------------------- |---------------------------------------------------------------------------------------|
+| **PricePollingJob** *(@Scheduled)*   | → `WatchRouteRepository`<br>→ `ExternalFlightApiClient`<br>→ `PriceDropOrchestrator`         | Executa periodicamente: coleta rotas ativas, chama API externa e delega orquestração. |
+| **PriceDropOrchestrator**            | → `PriceChangeDetector`<br>→ `PriceHistoryRepository`<br>→ `PriceAlertPublisher`<br>→ `PriceUpdatedMapper` | Orquestra o fluxo de detecção de quedas e publicação de alertas.                      |
+| **PriceChangeDetector**              | → `FlightRepository`<br>→ `PriceVariationPolicy`                                            | Detecta variações significativas comparando preços atuais com histórico.              |
+| **PriceUpdatedMapper**               | —                                                                                            | Converte eventos de domínio para payloads de alerta.                                  |
+| **TriggerManualFetchCommand**        | —                                                                                            | Comando para trigger manual de coleta (DTO/Record).                                   |
+| **HandleAlertCreatedService**        | —                                                                                            | Processa mensagem caso não exista uma alerta com o Id.                                |
 ---
 
 ## 3. Camada **Infrastructure** (`com.maal.searchservice.infra`)
@@ -95,11 +95,12 @@ Este serviço implementa uma arquitetura hexagonal (Ports & Adapters) com Clean 
 | **JpaPriceUpdatedAdapter**     | `PriceHistoryRepository`| Converte entre domain models e entities para histórico.          |
 
 #### Mappers de Persistência
-| Mapper                         | Conversão               | Observação                                                        |
-| ------------------------------ | ----------------------- | ----------------------------------------------------------------- |
-| **WatchRouteMapper**           | `WatchRoute` ↔ `Entity` | Conversão bidirecional com validações.                           |
-| **FlightPriceMapper**          | `FlightPrice` ↔ `Entity`| Conversão bidirecional preservando timestamps.                   |
-| **PriceHistoryMapper**         | `PriceUpdated` ↔ `Entity`| Conversão de eventos para persistência.                          |
+| Mapper                 | Conversão                 | Observação                                     |
+|------------------------|---------------------------|------------------------------------------------|
+| **WatchRouteMapper**   | `WatchRoute` ↔ `Entity`   | Conversão bidirecional com validações.         |
+| **FlightPriceMapper**  | `FlightPrice` ↔ `Entity`  | Conversão bidirecional preservando timestamps. |
+| **PriceHistoryMapper** | `PriceUpdated` ↔ `Entity` | Conversão de eventos para persistência.        |
+| **AlertCreatedMapper** | `WatchRoute` ↔ `AlertCreatedMessage`   | Conversão de eventos para dominio.             |
 
 ### 3.2 APIs Externas (`infra.api`)
 | Classe / Adapter                | Implementa / Usa        | Observação                                                       |
@@ -123,9 +124,9 @@ Este serviço implementa uma arquitetura hexagonal (Ports & Adapters) com Clean 
 | **ManualTriggerController** | `POST /trigger` (JSON com `origin`, `dest`, `date`) | → `ManualTriggerHandler.handle(...)` |
 
 ### 4.2 Event Handlers (`presentation.event`)
-| Handler                     | Eventos                     | Responsabilidade                     |
-| --------------------------- | --------------------------- | ------------------------------------ |
-| **AlertCreatedHandler**     | `alert.created`             | Processa alertas criados pelo Alert Service |
+| Handler                     | Eventos               | Responsabilidade                  |
+| --------------------------- | --------------------- |-----------------------------------|
+| **RabbitAlertCreatedListener**  | `alerts_created_queue`   | Processa alertas do Alert Service |
 
 ### 4.3 Mappers (`presentation.mapper`)
 | Mapper                      | Conversões                  | Responsabilidade                     |
