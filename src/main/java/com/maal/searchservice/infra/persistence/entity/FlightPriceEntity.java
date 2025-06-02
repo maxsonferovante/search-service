@@ -2,6 +2,8 @@ package com.maal.searchservice.infra.persistence.entity;
 
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -27,6 +29,7 @@ import java.util.Currency;
 public class FlightPriceEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String origin;
@@ -36,7 +39,7 @@ public class FlightPriceEntity {
     /**
 
      * | currency Diz em **qual moeda** o preço está expresso.
-     *      Assim o serviço pode comparar valores corretos e, se necessário, converter ou exibir “R\$ 499,99” vs. “USD 220.00”.                                                 | `Currency.getInstance("BRL")`           |
+     *      Assim o serviço pode comparar valores corretos e, se necessário, converter ou exibir "R\$ 499,99" vs. "USD 220.00".                                                 | `Currency.getInstance("BRL")`           |
      * | checkedAt Momento exato (timestamp, em UTC) em que aquele preço foi coletado ou em que o evento foi gerado.
      * Útil para saber quão fresca é a cotação, ordenar histórico e evitar comparar preços com datas muito distantes. | Instant.parse("2025-05-15T12:30:05Z")      * */
     Currency currency;

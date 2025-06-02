@@ -1,5 +1,7 @@
 package com.maal.searchservice.infra.persistence.entity;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -23,11 +25,19 @@ import java.util.UUID;
 public class PriceUpdatedEntity {
 
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     private UUID messageId;
-    private String route;
-    private LocalDate date;
+    private Long alertId;
+    private String origin;
+    private String destination;
+    private LocalDate outboundDate;
+    private LocalDate returnDate;
     private BigDecimal oldPrice;
+    private BigDecimal newPrice;
     private Currency currency;
+    private BigDecimal targetPrice;
+    private BigDecimal toleranceUp;
     private Instant checkedAt;
 }

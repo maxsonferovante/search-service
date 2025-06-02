@@ -17,10 +17,16 @@ import java.util.UUID;
 @Getter
 public class PriceUpdated {
 
-    private UUID messageId;
-    private String route;
-    private LocalDate date;
-    private BigDecimal oldPrice;
-    private Currency currency;
-    private Instant checkedAt;
+    UUID        messageId;
+    Long        alertId;        // quem pediu o alerta
+    String      origin;
+    String      destination;
+    LocalDate   outboundDate;     // ou travelDate se for só ida
+    LocalDate   returnDate;
+    BigDecimal  oldPrice;
+    BigDecimal  newPrice;
+    Currency    currency;
+    BigDecimal  targetPrice;      // pra análise futura
+    BigDecimal  toleranceUp;      // porcentagem aplicada
+    Instant     checkedAt;
 }
